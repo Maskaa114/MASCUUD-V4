@@ -1,0 +1,34 @@
+name: MASCUUD-V4
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      command:
+        description: "Amarka la orodsiinayo (tests / check / scan)"
+        required: true
+        default: tests
+        type: choice
+        options: [tests, check, scan]
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Tests
+        if: github.event_name != 'workflow_dispatch' || inputs.command == 'tests'
+        run: pytest -v
+      - name: Binance Testnet ${{ inputs.command }}
+        if: github.event_name == 'workflow_dispatch' && inputs.command != 'tests'
+        env:
+          MASCUUD_MODE: testnet
+          DRY_RUN: "true"
+          BINANCE_API_KEY: ${{ secrets.BINANCE_API_KEY }}
+          BINANCE_API_SECRET: ${{ secrets.BINANCE_API_SECRET }}
+        run: python -m mascuud ${{ inputs.command }}

@@ -1,0 +1,5 @@
+{
+  "name": "MASCUUD-V4",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "postCreateCommand": "pip install -r requirements.txt && cp -n .env.example .env"
+}
