@@ -1,0 +1,12 @@
+[project]
+name = "mascuud-v4"
+version = "4.0.0"
+description = "MASCUUD-V4 Binance Spot trading bot (Testnet-first)"
+requires-python = ">=3.10"
+dependencies = ["requests>=2.31", "websockets>=12.0", "python-dotenv>=1.0"]
+
+[project.scripts]
+mascuud = "mascuud.app:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
