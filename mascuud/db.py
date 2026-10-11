@@ -97,6 +97,12 @@ class Database:
     def open_trades(self) -> list[Trade]:
         return [Trade(**dict(r)) for r in self.conn.execute("SELECT * FROM trades WHERE status='OPEN'")]
 
+    def recent_closed(self, limit: int = 10) -> list[Trade]:
+        rows = self.conn.execute(
+            "SELECT * FROM trades WHERE status='CLOSED' ORDER BY closed_at DESC, id DESC LIMIT ?", (limit,)
+        )
+        return [Trade(**dict(r)) for r in rows]
+
     def realized_since(self, since_ts: int) -> float:
         row = self.conn.execute(
             "SELECT COALESCE(SUM(pnl),0) FROM trades WHERE status='CLOSED' AND closed_at>=?", (since_ts,)

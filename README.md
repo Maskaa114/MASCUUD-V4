@@ -11,7 +11,8 @@ Binance **Spot** trading bot foundation. It runs on **Testnet first**, and live 
 - Risk engine: % risk per trade, ATR stop/target, max open positions, daily loss limit, notional cap, LOT_SIZE / PRICE_FILTER / NOTIONAL rounding
 - SQLite trade store with P/L that accounts for fees, plus 24H / 7D / 30D reports
 - Open trades are persisted, so SL/TP management resumes after a restart
-- Telegram alerts (optional)
+- Telegram: BUY/SELL alerts with profit/loss, a daily report at 08:00 EAT, and the commands `/status`, `/report`, `/trades`, `/pause`, `/resume`
+- One-command server install (`deploy/install.sh`) that runs the bot 24/7 under systemd
 - Live-trading safety gate
 
 ## Endpoints
@@ -35,6 +36,7 @@ Testnet funds are virtual and Binance resets the Testnet data from time to time.
 ## Usage
 ```bash
 python -m mascuud setup    # asks for Testnet API key/secret, writes .env
+python -m mascuud telegram # connect Telegram bot (token from @BotFather)
 python -m mascuud check    # ping, clock offset, account balances
 python -m mascuud scan     # one-shot signal scan over SYMBOLS
 python -m mascuud run      # WebSocket trading loop
@@ -42,7 +44,19 @@ python -m mascuud report   # 24H / 7D / 30D P/L
 pytest                     # unit tests (offline)
 ```
 
-### Modes
+### Run 24/7 on a server (Oracle Cloud Free / any Ubuntu VPS)
+Use a server **outside the USA** (Binance blocks US IPs with HTTP 451), e.g. Oracle Cloud Always Free in Frankfurt/Amsterdam.
+```bash
+git clone -b claude/vibrant-babbage-cqy4mi https://github.com/Maskaa114/MASCUUD-V4.git
+bash MASCUUD-V4/deploy/install.sh     # asks for Binance Testnet keys + Telegram token
+```
+| Task | Command |
+|---|---|
+| Live logs | `sudo journalctl -u mascuud -f` |
+| Update to latest code | `bash ~/MASCUUD-V4/deploy/update.sh` |
+| Stop / start | `sudo systemctl stop mascuud` / `sudo systemctl start mascuud` |
+
+## Modes
 | `.env` | Behaviour |
 |---|---|
 | `MASCUUD_MODE=testnet`, `DRY_RUN=true` (default) | Orders are validated with `/api/v3/order/test` and never filled. Trades are simulated at signal price with 10,000 USDT paper equity. |
@@ -61,7 +75,12 @@ mascuud/
   risk.py            sizing, filters, gates
   trader.py          order execution, SL/TP exits
   db.py              SQLite trades + reports
-  telegram.py        alerts
+  telegram.py        alerts + command bot
+  reports.py         report / status / trades text
+  envfile.py         .env updates
+deploy/
+  install.sh         server installer (systemd)
+  update.sh          pull + restart
   app.py             CLI
 tests/test_core.py
 ```

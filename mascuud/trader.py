@@ -58,6 +58,7 @@ class Trader:
         self.tg = telegram
         self.filters = filters or {}
         self.paper_equity = 10_000.0
+        self.paused = False
 
     @property
     def mode_label(self) -> str:
@@ -81,6 +82,9 @@ class Trader:
     # --- entries ---------------------------------------------------------
     def on_signal(self, sig: Signal) -> int | None:
         if sig.action != "BUY":
+            return None
+        if self.paused:
+            log.info("%s BUY skipped: bot is paused", sig.symbol)
             return None
         open_trades = self.db.open_trades()
         equity = self.equity()
@@ -112,8 +116,10 @@ class Trader:
             return None
         trade_id = self.db.open_trade(sig.symbol, self.mode_label, qty, price, float(plan.stop_loss),
                                       float(plan.take_profit), fee, str(order.get("orderId", cid)))
-        self.tg.send(f"🟢 [{self.mode_label}] BUY {sig.symbol} qty={qty} @ {price:.4f} "
-                     f"SL={plan.stop_loss} TP={plan.take_profit} ({sig.reason})")
+        self.tg.send(f"🟢 BUY {sig.symbol}  [{self.mode_label}]\n"
+                     f"Price: {price:g}\nQty: {qty:g}  (≈{price * qty:.2f} USDT)\n"
+                     f"Stop-loss: {plan.stop_loss}\nTake-profit: {plan.take_profit}\n"
+                     f"Reason: {sig.reason}")
         return trade_id
 
     # --- exits -----------------------------------------------------------
@@ -146,5 +152,9 @@ class Trader:
             return False
         price, _, fee = fill_summary(order, ref_price, float(qty))
         pnl = self.db.close_trade(trade_id, price, reason, fee, str(order.get("orderId", "")))
-        self.tg.send(f"🔴 [{self.mode_label}] {reason} {t.symbol} #{trade_id} @ {price:.4f} P/L={pnl:+.4f}")
+        pct = (price / t.entry_price - 1) * 100 if t.entry_price else 0.0
+        icon = "✅ PROFIT" if pnl > 0 else "❌ LOSS"
+        self.tg.send(f"🔴 SELL {t.symbol}  [{self.mode_label}]  {icon}\n"
+                     f"Reason: {reason}\nBuy: {t.entry_price:g} → Sell: {price:g} ({pct:+.2f}%)\n"
+                     f"P/L: {pnl:+.2f} USDT\nToday: {self.db.realized_since(self.day_start()):+.2f} USDT")
         return True

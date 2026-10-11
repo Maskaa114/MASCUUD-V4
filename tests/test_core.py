@@ -181,3 +181,56 @@ def test_ws_message_triggers_callback_on_close():
     asyncio.run(eng.handle_message(msg(0, 1.5, False)))
     asyncio.run(eng.handle_message(msg(0, 1.6, True)))
     assert seen == [("BTCUSDT", 1.6)] and len(store.closed("BTCUSDT")) == 1
+
+
+# --- telegram / reports / env ----------------------------------------------------
+from mascuud.app import command_handlers, seconds_until_utc_hour
+from mascuud.envfile import set_env_values
+from mascuud.reports import report_text, status_text, trades_text
+from mascuud.telegram import CommandBot
+
+
+def test_set_env_values_keeps_other_lines(tmp_path):
+    env, tpl = tmp_path / ".env", tmp_path / ".env.example"
+    tpl.write_text("# c\nBINANCE_API_KEY=\nDRY_RUN=true\n")
+    set_env_values({"BINANCE_API_KEY": "k1"}, str(env), str(tpl))
+    set_env_values({"TELEGRAM_CHAT_ID": "42"}, str(env), str(tpl))
+    assert env.read_text() == "# c\nBINANCE_API_KEY=k1\nDRY_RUN=true\nTELEGRAM_CHAT_ID=42\n"
+
+
+def test_seconds_until_utc_hour():
+    assert seconds_until_utc_hour(5, now=4 * 3600) == 3600
+    assert seconds_until_utc_hour(5, now=6 * 3600) == 23 * 3600
+
+
+def make_trader(tmp_path):
+    cfg = load_config({"RISK_PER_TRADE_PCT": "1"})
+    db = Database(str(tmp_path / "t.db"))
+    return Trader(cfg, FakeClient(), db, RiskEngine.from_config(cfg), Telegram(),
+                  {"BTCUSDT": SymbolFilters(step_size=Decimal("0.001"))})
+
+
+def test_reports_text(tmp_path):
+    tr = make_trader(tmp_path)
+    tid = tr.on_signal(Signal("BTCUSDT", "BUY", 100.0, 2.0, 50.0, Regime.TREND_UP, "test"))
+    assert "BTCUSDT" in status_text(tr, {"BTCUSDT": 101.0})
+    tr.on_candle("BTCUSDT", Candle(0, 100, 107, 99.5, 106.5, 1, 1))
+    assert tr.db.get(tid).exit_reason == "TAKE_PROFIT"
+    rep = report_text(tr.db)
+    assert "24H" in rep and "+120.00 USDT" in rep
+    assert "✅" in trades_text(tr.db) and "BUY 100" in trades_text(tr.db)
+
+
+def test_command_bot_pause_and_auth(tmp_path):
+    tr = make_trader(tmp_path)
+    bot = CommandBot(Telegram("t", "42"), command_handlers(tr))
+
+    def upd(text, chat=42):
+        return {"update_id": 1, "message": {"chat": {"id": chat}, "text": text}}
+
+    assert bot.handle(upd("/pause", chat=999)) is None  # stranger ignored
+    assert "Paused" in bot.handle(upd("/pause"))
+    assert tr.on_signal(Signal("BTCUSDT", "BUY", 100.0, 2.0, 50.0, Regime.TREND_UP, "t")) is None
+    assert "Resumed" in bot.handle(upd("/resume@MyBot"))
+    assert "/status" in bot.handle(upd("/unknown"))
+    assert "REPORT" in bot.handle(upd("/report"))
