@@ -56,6 +56,12 @@ bash MASCUUD-V4/deploy/install.sh     # asks for Binance Testnet keys + Telegram
 | Update to latest code | `bash ~/MASCUUD-V4/deploy/update.sh` |
 | Stop / start | `sudo systemctl stop mascuud` / `sudo systemctl start mascuud` |
 
+### Railway (GitHub deploy, no server to manage)
+`railway.json` starts `python -m mascuud run` and restarts it automatically. In Railway set the
+service **region to EU West** (US regions get HTTP 451 from Binance) and add the variables
+`BINANCE_API_KEY`, `BINANCE_API_SECRET`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`.
+The SQLite trade history is lost on redeploy unless you attach a volume and set `DB_PATH` to it.
+
 ## Modes
 | `.env` | Behaviour |
 |---|---|
