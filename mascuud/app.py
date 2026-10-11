@@ -67,9 +67,12 @@ def cmd_setup() -> int:
     print("2) Paste Secret Key, kadib riix Enter.")
     print("   (Qoraalku ma muuqanayo marka aad paste gareyso - taasi waa caadi.)")
     secret = getpass.getpass("   Secret Key: ").strip()
-    if not key or not secret:
-        print("Key ama Secret waa madhan yahay. Mar kale isku day.", file=sys.stderr)
-        return 1
+    import re
+    for name, value in (("API Key", key), ("Secret Key", secret)):
+        if not re.fullmatch(r"[A-Za-z0-9]{64}", value):
+            print(f"{name} ma saxna: waa inuu ahaadaa 64 xaraf/lambar, meel bannaan la'aan "
+                  f"(waxaa la helay {len(value)}). Mar kale orod: python -m mascuud setup", file=sys.stderr)
+            return 1
     lines = []
     for line in template.read_text().splitlines():
         if line.startswith("BINANCE_API_KEY="):
