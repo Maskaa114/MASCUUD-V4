@@ -88,7 +88,9 @@ def cmd_telegram() -> int:
     token = input("1) Paste bot token, kadib riix Enter: ").strip()
     print("\033[2J\033[H", end="")
     if not re.fullmatch(r"\d+:[A-Za-z0-9_-]{30,}", token):
-        print("Token-ku ma saxna (tusaale: 123456789:AAH...). Mar kale isku day.", file=sys.stderr)
+        hint = " Qaybta hore (lambarrada + ':') ayaa ka maqan." if ":" not in token else ""
+        print(f"Token-ku ma saxna - waa inuu u ekaadaa 123456789:AAH... (lambarro, ':', kadib xarfo).{hint}\n"
+              "Mar kale orod: python -m mascuud telegram", file=sys.stderr)
         return 1
     tg = Telegram(token)
     me = tg.call("getMe")
