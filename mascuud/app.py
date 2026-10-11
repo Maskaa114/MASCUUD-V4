@@ -55,7 +55,6 @@ def cmd_check(cfg) -> int:
 
 def cmd_setup() -> int:
     """Write a fresh .env from .env.example, asking for the Testnet API keys."""
-    import getpass
     from pathlib import Path
 
     template = Path(".env.example")
@@ -64,9 +63,8 @@ def cmd_setup() -> int:
         return 1
     print("MASCUUD-V4 setup (Binance Spot TESTNET)")
     key = input("1) Paste API Key, kadib riix Enter: ").strip()
-    print("2) Paste Secret Key, kadib riix Enter.")
-    print("   (Qoraalku ma muuqanayo marka aad paste gareyso - taasi waa caadi.)")
-    secret = getpass.getpass("   Secret Key: ").strip()
+    secret = input("2) Paste Secret Key, kadib riix Enter: ").strip()
+    print("\033[2J\033[H", end="")  # clear the screen so the secret isn't left visible
     import re
     for name, value in (("API Key", key), ("Secret Key", secret)):
         if not re.fullmatch(r"[A-Za-z0-9]{64}", value):
