@@ -34,6 +34,7 @@ Testnet funds are virtual and Binance resets the Testnet data from time to time.
 
 ## Usage
 ```bash
+python -m mascuud setup    # asks for Testnet API key/secret, writes .env
 python -m mascuud check    # ping, clock offset, account balances
 python -m mascuud scan     # one-shot signal scan over SYMBOLS
 python -m mascuud run      # WebSocket trading loop

@@ -53,6 +53,35 @@ def cmd_check(cfg) -> int:
     return 0
 
 
+def cmd_setup() -> int:
+    """Write a fresh .env from .env.example, asking for the Testnet API keys."""
+    import getpass
+    from pathlib import Path
+
+    template = Path(".env.example")
+    if not template.exists():
+        print("Ma helin .env.example - ka orod amarka folder-ka MASCUUD-V4.", file=sys.stderr)
+        return 1
+    print("MASCUUD-V4 setup (Binance Spot TESTNET)")
+    key = input("1) Paste API Key, kadib riix Enter: ").strip()
+    print("2) Paste Secret Key, kadib riix Enter.")
+    print("   (Qoraalku ma muuqanayo marka aad paste gareyso - taasi waa caadi.)")
+    secret = getpass.getpass("   Secret Key: ").strip()
+    if not key or not secret:
+        print("Key ama Secret waa madhan yahay. Mar kale isku day.", file=sys.stderr)
+        return 1
+    lines = []
+    for line in template.read_text().splitlines():
+        if line.startswith("BINANCE_API_KEY="):
+            line = f"BINANCE_API_KEY={key}"
+        elif line.startswith("BINANCE_API_SECRET="):
+            line = f"BINANCE_API_SECRET={secret}"
+        lines.append(line)
+    Path(".env").write_text("\n".join(lines) + "\n")
+    print(f".env waa la keydiyay (key ...{key[-4:]}). Hadda orod: python -m mascuud check")
+    return 0
+
+
 def cmd_scan(cfg) -> int:
     client = BinanceClient(cfg.rest_base)
     for sym in cfg.symbols:
@@ -103,11 +132,13 @@ async def run_loop(cfg) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="mascuud", description="MASCUUD-V4 Binance Spot bot")
-    p.add_argument("command", choices=["check", "scan", "run", "report"])
+    p.add_argument("command", choices=["setup", "check", "scan", "run", "report"])
     p.add_argument("-v", "--verbose", action="store_true")
     args = p.parse_args(argv)
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO,
                         format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+    if args.command == "setup":
+        return cmd_setup()
     try:
         cfg = load_config()
     except ConfigError as exc:
