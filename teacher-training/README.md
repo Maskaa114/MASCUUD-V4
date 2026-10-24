@@ -1,6 +1,8 @@
-# Tababarka Macallimiinta Xirfadlaha ah (SREB)
+# Tababarka Macallimiinta Xirfadlaha ah
 
-Barnaamij tababar oo **offline** ah oo loogu talagalay macallimiinta fasalada 1–8 ee Dowlad-Goboleedka Soomaalida, gaar ahaan **Gobolka Jarar**.
+**Xafiiska Waxbarashada Dowlad Deegaanka Soomaalida · Somali Regional State Education Bureau**
+
+Barnaamij tababar oo **offline** ah oo loogu talagalay macallimiinta fasalada 1–8 ee Dowlad Deegaanka Soomaalida, gaar ahaan **Gobolka Jarar**.
 
 ## Sida loo isticmaalo
 1. Fur `SREB_Teacher_Training_Platform.html` (Chrome, Edge ama Firefox). Internet looma baahna.
