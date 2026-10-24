@@ -2,7 +2,7 @@
 
 **Xafiiska Waxbarashada Dowlada Deegaanka Soomaalida · Somali Regional State Education Bureau**
 
-Barnaamij tababar oo **offline** ah oo loogu talagalay macallimiinta fasalada 1–8 ee Dowlada Deegaanka Soomaalida, gaar ahaan **Gobolka Jarar**.
+Barnaamij tababar oo **offline** ah oo loogu talagalay macallimiinta fasalada 1–8 ee **gobollada Dowlada Deegaanka Soomaalida oo dhan**.
 
 ## Sida loo isticmaalo
 1. Fur `SREB_Teacher_Training_Platform.html` (Chrome, Edge ama Firefox). Internet looma baahna.
@@ -21,7 +21,7 @@ Furaha maamulaha ee caadiga ah: `admin123`. Ka beddel **Maamul → Habaynta**.
 6. Guusha Arday Kasta *(cusub)*
 7. Horumarka Xirfadeed iyo Bulshada *(cusub)*
 
-Cashar kasta: fikradda muhiimka ah · qodobo · tusaale Jarar ah · "Isku day berri".
+Cashar kasta: fikradda muhiimka ah · qodobo · tusaale deegaanka ah · "Isku day berri".
 
 ## Waxyaabaha muhiimka ah
 - Isku-dayga imtixaanka xad ma leh. Imtixaanka kadib macallinku wuxuu arkaa jawaabaha saxda ah iyo sharraxaad.
